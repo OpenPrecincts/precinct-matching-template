@@ -1,4 +1,4 @@
-# STATE 2018 Election Shapefile
+# STATE YEAR Election Shapefile
 
 This shapefile comes from SOURCE and was matched with YEAR general election results by the Princeton Gerrymandering Project. 
 
