@@ -102,6 +102,20 @@ def clay(dat):
             "South St Francis": "South St. Francis",
         })
     
+def clark(dat):
+    dat["PREC"] = dat["PREC"].replace({
+        "caddo valley ward 1": "caddo valley wards 1-3",
+        "caddo valley ward 2": "caddo valley wards 1-3",
+        "caddo valley ward 3": "caddo valley wards 1-3",
+        "gum springs inside": "gum springs inside/outside",
+        "gum springs outside": "gum springs inside/outside",
+        "gurdon ward 1": "gurdon wards 1-5",
+        "gurdon ward 2": "gurdon wards 1-5",
+        "gurdon ward 3": "gurdon wards 1-5",
+        "gurdon ward 4": "gurdon wards 1-5",
+        "gurdon ward 5": "gurdon wards 1-5",
+    })
+    
 def cleveland(dat):
     chop_five(dat)
     dat["prec"] = dat["prec"].replace(
@@ -122,6 +136,53 @@ def conway(dat):
          "Morrilton Ward 4": "Ward 4",
          "nifee City": "menifee city",
          })
+    
+def crittenden(dat):
+    dat["PREC"] = dat["PREC"].replace({
+        "11 - ward 1 precinct 1": "1ST BAPTIST CHURCH WMPH",
+        "12 - ward 1 precinct 2": "1ST BAPTIST CHURCH WMPH",
+        "41 - ward 4 precinct 1": "7TH STREET CHURCH WMPH",
+        "42 - ward 4 precinct 2": "7TH STREET CHURCH WMPH",
+        "79 - bob ward 2": "ANTHONYVILLE CITY HALL",
+        "70 - lucas": "BONDS MARINE",
+        "32 - ward 3 precinct 2": "CALVARY WMPH",
+        "21 - ward 2 precinct 1": "CIVIC CENTER",
+        "22 - ward 2 precinct 2": "CIVIC CENTER",
+        "63 - jackson 1": "CRAWFORDSVILLE",
+        "59 - earle ward 1": "EARLE CITY HALL",
+        "60 - earle ward 2": "EARLE CITY HALL",
+        "61 - earle ward 3": "EARLE CITY HALL",
+        "73 - north tyronza": "EARLE CITY HALL",
+        "74 - south tyronza": "EARLE CITY HALL",
+        "71-mississippi country box": "WM HIGH SCHOOL",
+        "56 - bob ward 1": "EDMONDSON",
+        "57 - north fogleman": "GILMORE",
+        "54 - east black oak": "HEAFER",
+        "55- west black oak": "HEAFER",
+        "77- lucas estate (h'shoe lake)": "HORSESHOE FIRE STATION",
+        "81 - south tyronza, jeanette": "JENNETTE CITY HALL",
+        "82 - wappanocca, clarkdale": "JERICHO CITY HALL",
+        "80 - wappanocca, jericho": "JERICHO CITY HALL",
+        "76 - wappanocca": "JERICHO CITY HALL",
+        "65 - jasper country box (court": "MARION CHURCH OF GOD",
+        "67 - jasper 1": "MARION CHURCH OF GOD",
+        "69 - jasper 3": "MARION COUNTY OFFICE",
+        "66 - mound city": "MARION COUNTY OFFICE",
+        "75 - jasper county box, sunset": "MARION COUNTY OFFICE",
+        "68 - jasper 2": "MARION IMMANUEL HWY 77",
+        "78 - jasper country box (lakes": "MARION IMMANUEL HWY 77",
+        "23 - ward 2 precinct 3": "MT OLIVE WMPH",
+        "64 - jackson 2": "MT PISGAH CHURCH",
+        "51 - ward 5 precinct 1": "PILGRIMS REST CHURCH",
+        "62 - earle ward 4": "ST LUKE CHURCH",
+        "13 - ward 1 precicnt 3": "WM HIGH SCHOOL",
+        "14 - ward 1 precicnt 4": "WM HIGH SCHOOL",
+        "31 - ward 3 precinct 1": "WM HIGH SCHOOL",
+        "33 - ward 3 precinct 3": "WM HIGH SCHOOL",
+        "72 - proctor": "WM HIGH SCHOOL",
+        "52 - ward 5 precinct 2": "WONDER BOYS CLUB",
+        "58 - south fogleman": "WR GOLDEN",
+    })
 
 def crawford(dat):
     dat["prec"] = dat["prec"].replace(
@@ -262,12 +323,14 @@ countyToCountyCleaner = {
     "Boone": boone,
     "Carroll": carroll,
     "Chicot": chicot,
+    "Clark": clark,
     "Clay": clay,
     "Cleburne": chop_five,
     "Cleveland": cleveland,
     "Columbia": columbia,
     "Conway": conway,
     "Crawford": crawford,
+    "Crittenden": crittenden,
     "Cross": cross,
     "Dallas": dallas,
     "Desha": desha,
@@ -313,5 +376,15 @@ for county in counties:
 
 clean_df['prec'] = clean_df['prec'].str.lower()
 clean_df.reset_index(inplace=True)
+print("clean_df, reset index", clean_df)
 
-clean_df.to_file("/Users/hopecj/projects/AR/Shapefiles/1_edited_precnames/clean.shp")
+clean_df["loc_prec"] = clean_df["county_nam"] + "," + clean_df["prec"]
+dissolved = clean_df.dissolve(by='loc_prec', as_index=False) # combine 2+ shapes with same precinct name into one
+print(list(dissolved.columns))
+
+# check for topology errors
+print("topology errors", dissolved.is_valid)
+
+dissolved = dissolved[["state_fips", "county_fip", "county_nam", "precinct", "prec", "geometry"]]
+
+dissolved.to_file("/Users/hopecj/projects/AR/Shapefiles/clean.shp")
